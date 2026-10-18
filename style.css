@@ -1,0 +1,12 @@
+/* Tombstones: this file used to contain all styles for the app.
+   It has been refactored into modular CSS files under /css.
+   Keep this as a shim for backward compatibility. */
+
+/* New source of truth lives here: */
+@import url('./css/variables.css');
+@import url('./css/animations.css');
+@import url('./css/base.css');
+@import url('./css/buttons.css');
+@import url('./css/menu.css');
+@import url('./css/game.css');
+@import url('./css/gamemodes.css');

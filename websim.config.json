@@ -1,0 +1,8 @@
+{
+  "database": {
+    "overlays": [],
+    "schema": {},
+    "instructions": "This game uses Websim's built-in credit transactions system for the donations leaderboard."
+  }
+}
+

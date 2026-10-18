@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weapon Ball Battles!</title>
+    <!-- Modular CSS: break up monolith for maintainability -->
+    <link rel="stylesheet" href="./css/variables.css">
+    <link rel="stylesheet" href="./css/animations.css">
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/buttons.css">
+    <link rel="stylesheet" href="./css/menu.css">
+    <link rel="stylesheet" href="./css/game.css">
+    <link rel="stylesheet" href="./css/gamemodes.css">
+    <!-- Legacy shim for any code that still imports style.css directly -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loading-screen">
+        <p>Loading Game...</p>
+    </div>
+    <div id="transition-overlay"></div>
+    <div id="main-menu" style="display: none; opacity: 0;">
+        <h2 id="mrbobbys-title">dabobby's</h2>
+        <h1 id="game-title">Weapon Ball Battles!</h1>
+        <button id="startButton">Start Game</button>
+        <!-- NEW: How To Play button directly under Start -->
+        <button id="howToPlayButton" class="menu-htp-btn">How to Play</button>
+        <div id="menu-secondary-buttons">
+            <!-- Reordered: Leaderboard, then Credits -->
+            <button id="leaderboardButton">Leaderboard</button>
+            <button id="creditsButton">Credits</button>
+        </div>
+    </div>
+    
+    <div id="game-container" style="display: none; opacity: 0;">
+        <!-- NEW: Top controls row above the VS text -->
+        <div id="top-controls">
+            <button id="hideUIButton">Hide UI</button>
+            <button id="gamemodesButton">Gamemodes</button>
+            <button id="gravityButton" title="Toggle gravity for this match">Gravity: On</button>
+            <!-- NEW: Music mute toggle -->
+            <button id="musicMuteButton" title="Mute or unmute music">Mute Music</button>
+            <!-- NEW: Health editor toggle button -->
+            <button id="healthButton" title="Edit players' health">Health Editor</button>
+            <!-- NEW: Brush size button (only visible in Custom mode) -->
+            <button id="brushSizeButton" title="Change block brush size" style="display:none;">Brush: 1x1</button>
+            <!-- NEW: Paint toggle (only visible in Custom mode) -->
+            <button id="paintButton" title="Equip paint tool" style="display:none;">Paint</button>
+            <!-- NEW: Erase toggle (only visible in Custom mode) -->
+            <button id="eraseButton" title="Equip erase tool" style="display:none;">Erase</button>
+            <button id="customMakerButton" title="Create a custom ball">Custom Ball Maker</button>
+        </div>
+
+        <div id="versus-display"></div>
+        <div id="arena-wrapper">
+            <div class="selection-box" id="selection-box-left">
+            </div>
+            <!-- NEW: stack container so we can overlay a blackout + message during shrinking -->
+            <div id="canvas-stack">
+                <!-- NEW: Background canvas for Custom grid + blocks (balls render above this) -->
+                <canvas id="custom-grid-background" style="position:absolute; inset:0; z-index:0; pointer-events:none;"></canvas>
+                <canvas id="gameCanvas" width="520" height="520" style="position:relative; z-index:1;"></canvas>
+                <!-- NEW: Custom build grid overlay (click to toggle blocks). Overlay is transparent; lines draw on background -->
+                <canvas id="custom-grid-overlay" style="display:none; position:absolute; inset:0; pointer-events:auto; z-index:2;"></canvas>
+                <div id="arena-shrinking-overlay" style="display:none;">
+                    <div class="shrinking-text">Arena is shrinking!</div>
+                </div>
+            </div>
+            <div class="selection-box" id="selection-box-right">
+            </div>
+        </div>
+        <div id="damage-info-wrapper">
+            <div id="damage-display-left" class="damage-display"></div>
+            <div id="damage-display-right" class="damage-display"></div>
+        </div>
+        <div id="controls">
+            <div id="game-buttons">
+                <!-- NEW: Speed control -->
+                <button id="speedButton" title="Change game speed">1x</button>
+                <button id="playButton">Play</button>
+                <button id="resetButton">Reset</button>
+                <!-- moved: Zoom controls are now adjacent to Reset, in the same bottom row -->
+                <div id="zoom-controls">
+                    <button id="zoomOutButton" title="Zoom out">-</button>
+                    <button id="zoomInButton" title="Zoom in">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="gamemodes-menu" style="display: none;">
+        <h1>Gamemodes</h1>
+        <div id="gamemode-buttons">
+            <div id="classic-mode-container" class="gamemode-block">
+                <button id="classicButton" class="gamemode-btn classic">Classic</button>
+                <div id="arena-size-selection" class="arena-size-selection">
+                    <div class="arena-size-option" id="small-arena-btn" data-size="small">
+                        <div class="size-square small-square"></div>
+                        <span>Small</span>
+                    </div>
+                    <div class="arena-size-option" id="medium-arena-btn" data-size="medium">
+                        <div class="size-square medium-square"></div>
+                        <span>Medium</span>
+                    </div>
+                    <div class="arena-size-option" id="large-arena-btn" data-size="large">
+                        <div class="size-square large-square"></div>
+                        <span>Large</span>
+                    </div>
+                    <div class="arena-size-option" id="huge-arena-btn" data-size="huge">
+                        <div class="size-square huge-square"></div>
+                        <span>Huge</span>
+                    </div>
+                    <!-- NEW: Massive -->
+                    <div class="arena-size-option" id="massive-arena-btn" data-size="massive" title="Largest arena">
+                        <div class="size-square massive-square"></div>
+                        <span>Massive</span>
+                    </div>
+                    <!-- NEW: Custom map option -->
+                    <div class="arena-size-option" id="custom-arena-btn" data-size="custom" title="Huge map with editable grid before play">
+                        <div class="size-square huge-square" style="background: #ffffff; position:relative; overflow:hidden;">
+                            <!-- tiny grid preview -->
+                            <div style="position:absolute; inset:0; background-image:
+                              linear-gradient(#aaa 1px, transparent 1px),
+                              linear-gradient(90deg, #aaa 1px, transparent 1px);
+                              background-size: 12px 12px;"></div>
+                        </div>
+                        <span>Custom</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ffa-mode-container" class="gamemode-block">
+                <button id="freeForAllButton" class="gamemode-btn free-for-all">Free for All</button>
+                <div id="arena-size-selection-ffa" class="arena-size-selection">
+                    <div class="arena-size-option" id="small-arena-btn-ffa" data-size="small">
+                        <div class="size-square small-square"></div>
+                        <span>Small</span>
+                    </div>
+                    <div class="arena-size-option" id="medium-arena-btn-ffa" data-size="medium">
+                        <div class="size-square medium-square"></div>
+                        <span>Medium</span>
+                    </div>
+                    <div class="arena-size-option" id="large-arena-btn-ffa" data-size="large">
+                        <div class="size-square large-square"></div>
+                        <span>Large</span>
+                    </div>
+                    <div class="arena-size-option" id="huge-arena-btn-ffa" data-size="huge">
+                        <div class="size-square huge-square"></div>
+                        <span>Huge</span>
+                    </div>
+                    <!-- NEW: Massive (FFA) -->
+                    <div class="arena-size-option" id="massive-arena-btn-ffa" data-size="massive" title="Largest arena">
+                        <div class="size-square massive-square"></div>
+                        <span>Massive</span>
+                    </div>
+                    <!-- NEW: Shrinking option (FFA) -->
+                    <div class="arena-size-option" id="shrinking-arena-btn-ffa" data-size="shrinking" title="Starts Massive, shrinks every 30s">
+                        <div class="shrinking-stack">
+                            <div class="size-square massive-square"></div>
+                            <div class="size-square huge-square"></div>
+                            <div class="size-square large-square"></div>
+                            <div class="size-square medium-square"></div>
+                            <div class="size-square small-square"></div>
+                        </div>
+                        <span>Shrinking</span>
+                    </div>
+                    <!-- NEW: Custom (FFA) -->
+                    <div class="arena-size-option" id="custom-arena-btn-ffa" data-size="custom" title="Huge map with editable grid before play">
+                        <div class="size-square huge-square" style="background: #ffffff; position:relative; overflow:hidden;">
+                            <div style="position:absolute; inset:0; background-image:
+                              linear-gradient(#aaa 1px, transparent 1px),
+                              linear-gradient(90deg, #aaa 1px, transparent 1px);
+                              background-size: 12px 12px;"></div>
+                        </div>
+                        <span>Custom</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teams-mode-container" class="gamemode-block">
+                <button id="teamsButton" class="gamemode-btn teams">Teams</button>
+                <div id="arena-size-selection-teams" class="arena-size-selection">
+                    <div class="arena-size-option" id="small-arena-btn-teams" data-size="small">
+                        <div class="size-square small-square"></div>
+                        <span>Small</span>
+                    </div>
+                    <div class="arena-size-option" id="medium-arena-btn-teams" data-size="medium">
+                        <div class="size-square medium-square"></div>
+                        <span>Medium</span>
+                    </div>
+                    <div class="arena-size-option" id="large-arena-btn-teams" data-size="large">
+                        <div class="size-square large-square"></div>
+                        <span>Large</span>
+                    </div>
+                    <div class="arena-size-option" id="huge-arena-btn-teams" data-size="huge">
+                        <div class="size-square huge-square"></div>
+                        <span>Huge</span>
+                    </div>
+                    <!-- NEW: Massive (Teams) -->
+                    <div class="arena-size-option" id="massive-arena-btn-teams" data-size="massive" title="Largest arena">
+                        <div class="size-square massive-square"></div>
+                        <span>Massive</span>
+                    </div>
+                    <!-- NEW: Shrinking option (Teams) -->
+                    <div class="arena-size-option" id="shrinking-arena-btn-teams" data-size="shrinking" title="Starts Massive, shrinks every 30s">
+                        <div class="shrinking-stack">
+                            <div class="size-square massive-square"></div>
+                            <div class="size-square huge-square"></div>
+                            <div class="size-square large-square"></div>
+                            <div class="size-square medium-square"></div>
+                            <div class="size-square small-square"></div>
+                        </div>
+                        <span>Shrinking</span>
+                    </div>
+                    <!-- NEW: Custom (Teams) -->
+                    <div class="arena-size-option" id="custom-arena-btn-teams" data-size="custom" title="Huge map with editable grid before play">
+                        <div class="size-square huge-square" style="background: #ffffff; position:relative; overflow:hidden;">
+                            <div style="position:absolute; inset:0; background-image:
+                              linear-gradient(#aaa 1px, transparent 1px),
+                              linear-gradient(90deg, #aaa 1px, transparent 1px);
+                              background-size: 12px 12px;"></div>
+                        </div>
+                        <span>Custom</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Boss Fight mode -->
+            <div id="boss-mode-container" class="gamemode-block">
+                <button id="bossButton" class="gamemode-btn boss">Boss Fight</button>
+                <div id="arena-size-selection-boss" class="arena-size-selection">
+                    <!-- Only Large and Huge allowed -->
+                    <div class="arena-size-option" id="large-arena-btn-boss" data-size="large">
+                        <div class="size-square large-square"></div>
+                        <span>Large</span>
+                    </div>
+                    <div class="arena-size-option" id="huge-arena-btn-boss" data-size="huge">
+                        <div class="size-square huge-square"></div>
+                        <span>Huge</span>
+                    </div>
+                    <!-- NEW: Massive (Boss) -->
+                    <div class="arena-size-option" id="massive-arena-btn-boss" data-size="massive" title="Largest arena">
+                        <div class="size-square massive-square"></div>
+                        <span>Massive</span>
+                    </div>
+                    <!-- NEW: Custom (Boss) -->
+                    <div class="arena-size-option" id="custom-arena-btn-boss" data-size="custom" title="Huge map with editable grid before play">
+                        <div class="size-square huge-square" style="background: #ffffff; position:relative; overflow:hidden;">
+                            <div style="position:absolute; inset:0; background-image:
+                              linear-gradient(#aaa 1px, transparent 1px),
+                              linear-gradient(90deg, #aaa 1px, transparent 1px);
+                              background-size: 12px 12px;"></div>
+                        </div>
+                        <span>Custom</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="backButton" class="gamemode-btn">Back</button>
+    </div>
+    
+    <div id="credits-menu" style="display: none;">
+        <div id="credits-content">
+            <div id="credits-text">
+                <div class="credits-track">
+                    <!-- Single Group (scroll once, then clear) -->
+                    <div class="credits-group">
+                        <div class="credits-section">
+                            <div class="credits-title">Creator</div>
+                            <div class="credits-name">@dabobby</div>
+                        </div>
+                        <div class="credits-section">
+                            <div class="credits-title">Main inspiration/main weapon creator</div>
+                            <div class="credits-name">Earclacks</div>
+                        </div>
+                        <div class="credits-section">
+                            <div class="credits-title">First Supporter</div>
+                            <div class="credits-name">@kodaluna</div>
+                        </div>
+                        <div class="credits-section">
+                            <div class="credits-title">Music producer</div>
+                            <div class="credits-name">@dabobby</div>
+                        </div>
+                        <div class="credits-section">
+                            <div class="credits-title">Thumbnail creator</div>
+                            <div class="credits-name">@dabobby</div>
+                        </div>
+                        <div class="credits-section">
+                            <div class="credits-title">Software used</div>
+                            <div class="credits-name">Websim, Photoshop, BeepBox, ElevenLabs, ChatGPT</div>
+                        </div>
+                        <div class="credits-section" style="padding-top: 120px;">
+                            <div class="credits-title">And thank you, dear user, for playing!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="creditsBackButton" class="menu-back-button">Back</button>
+    </div>
+
+    <div id="leaderboard-menu" style="display: none;">
+        <div id="leaderboard-content">
+            <h1>Leaderboard</h1>
+            <div id="leaderboard-list">
+                <div class="leaderboard-loading">Loading leaderboard...</div>
+            </div>
+        </div>
+        <button id="leaderboardBackButton" class="menu-back-button">Back</button>
+    </div>
+
+    <!-- NEW: How To Play modal page -->
+    <div id="howto-menu" style="display: none;">
+        <h1 id="howto-title">How to Play</h1>
+        <div id="howto-content">
+            <div class="howto-section">
+                <h2>Basics</h2>
+                <ul>
+                    <li>Pick a weapon on the left and right to set up a 1v1 in Classic.</li>
+                    <li>Press Play to start or pause. Spacebar also toggles Play/Pause.</li>
+                    <li>Use - and + to zoom the whole game view.</li>
+                    <li>Toggle Gravity with the Gravity button. Classic defaults to Gravity ON; all other modes default to Gravity OFF (you can change it anytime).</li>
+                    <li>Drag a ball on the arena to reposition it before or during a match; momentum is restored on release.</li>
+                    <li>On start, the game will try to enter fullscreen for the best view (browser-permitting).</li>
+                    <li>Use Custom Ball Maker (top bar) to create your own melee/ranged fighters with textures and behavior rules; save and load them anytime.</li>
+                </ul>
+            </div>
+            <div class="howto-section">
+                <h2>Controls</h2>
+                <ul>
+                    <li>Play/Pause: Click Play or press Spacebar</li>
+                    <li>Reset: Resets the match while keeping selections</li>
+                    <li>Zoom: Use the - and + buttons beside Reset</li>
+                    <li>Hide/Show UI: Hide UI hides sidebars and controls. Show UI restores everything, including the Boss sidebar in Boss mode.</li>
+                    <li>Drag: Click/touch and hold a ball to move it; release to restore its momentum</li>
+                </ul>
+            </div>
+            <div class="howto-section">
+                <h2>Gamemodes</h2>
+                <ul>
+                    <li><strong>Classic</strong>: 1v1 duel. Gravity ON by default.</li>
+                    <li><strong>Free for All</strong>: Add up to 50 fighters. Pick any mix of weapons. Gravity is OFF by default.</li>
+                    <li><strong>Teams</strong>: Blue vs Red squads. Add fighters to each side. Gravity is OFF by default.</li>
+                    <li><strong>Boss Fight</strong>: A single giant Red boss with 5000 HP vs the Blue team. Slower, much larger. Available on Large, Huge, or Massive arenas; the boss is the same huge size on all. Gravity is OFF by default.</li>
+                    <li><strong>Custom</strong>: Build your arena on a 16×16 grid; blocks act like walls (balls and projectiles bounce off). Use Paint/Erase tools with brush sizes up to 5×5. Gravity is OFF by default; the grid hides when you press Play.</li>
+                </ul>
+            </div>
+            <div class="howto-section">
+                <h2>Arena Sizes</h2>
+                <ul>
+                    <li><strong>Small / Medium / Large / Huge / Massive</strong>: Pick from Gamemodes menu.</li>
+                    <li><strong>Shrinking</strong> (FFA/Teams only): Starts Massive and shrinks over time (Massive → Huge → Large → Medium → Small). The shrinking begins after you press Play. During each shrink transition, the arena briefly goes black and gameplay is paused, then resumes automatically.</li>
+                </ul>
+            </div>
+            <div class="howto-section">
+                <h2>Weapons</h2>
+                <ul>
+                    <li><strong>Basic</strong>: A simple ball with no weapon and no way to fight. Rumors say they're Unarmed's little peaceful sibling.</li>
+                    <li><strong>Sword</strong>: Increases damage on hit by 1. As balanced as can be.</li>
+                    <li><strong>Dagger</strong>: Spins +10 faster with every hit. Tiny but mighty.</li>
+                    <li><strong>Spear</strong>: Grows damage and range with each hit by 0.2. They might look frightening on bigger maps, but they have major weaknesses on smaller arenas!</li>
+                    <li><strong>Bow</strong>: Shoots 1 arrow for every hit. Arrows can also be deflected.  Bow often turns into a minigun at the end of a game. Watch out!</li>
+                    <li><strong>Staff</strong>: Shoots fireballs that explode on any contact; the explosion's radius and damage are based on its Damage/Radius stat. Increases +0.2 Damage/Radius per hit they land. Truly the mightiest of wizards.</li>
+                    <li><strong>Scythe</strong>: On hit, deals 1 immediate damage and adds 1 poison to the opponent. Poison ticks for 1 damage at evenly spaced intervals over a 5-second window; each poison adds another tick within that same window (more poisons = shorter time between ticks). They might lose the battle, but death claims all at the end...</li>
+                    <li><strong>Wrench</strong>: Deals 1 damage on hit and spawns a small rotating turret. Unlike others, Wrench's stats never change. They may or may not be from the future, no one really knows.</li>
+                    <li><strong>Hammer</strong>: Spins slowly and damages weakly at the start, but increases its spin speed and damage by 1 every hit. Rumors say Hammer might be related to Sword, Dagger and Unarmed, all at the same time.</li>
+                    <li><strong>Shield</strong>: Attacks by reflecting half of the opponent's damage, and gets +0.2 wider for every hit. To confuse your enemy, you must become your enemy...</li>
+                    <li><strong>Shuriken</strong>: Throws bouncing stars that gain 1 extra bounce per hit. A true ninja.</li>
+                    <li><strong>Unarmed</strong>: Their body is the weapon. Gains +1 damage/speed for every hit. Starts very slow but charges speed over time and slams into foes. They may look eerily similar to Basic, but do NOT underestimate Unarmed's dropkicking abilities...</li>
+                    <li><strong>Scepter</strong>: Heals teammates (starts at +1, increases by +0.5 per hit they land) and doesn't deal any damage. Only available in the Teams and Boss gamemodes.</li>
+                    <li><strong>Katana</strong>: On hit, queues several rapid slices that strike the opponent during their stun, then increases slices by +1. The blade of a true samurai...</li>
+                    <li><strong>Pickaxe</strong>: Chips away at opponents, shrinking them (and their speed and stats) by its current Chipping percentage on each hit. Starts at 1% chipping and 1 damage, then gains +0.5% Chipping and +0.5 Damage per successful hit. They truly yearn for the mines...</li>
+                    <li><strong>Bomb</strong>: Throws sticky bombs that latch onto walls, blocks, turrets, and opponents on contact. The fuse starts immediately on throw; the explosion deals area damage based on its Damage/Radius, which increases by +0.5 per enemy hit. Staff might be jealous of them.</li>
+                    <li><strong>Bat</strong>: Increases Damage/Stun time by 0.2 per hit. Believe it or not, they love baseball!</li>
+                </ul>
+            </div>
+            <div class="howto-section">
+                <h2>Tips</h2>
+                <ul>
+                    <li>Parries occur when two weapons meet while facing each other.</li>
+                    <li>Projectiles can be deflected by weapon collisions; deflected arrows and shuriken can damage anyone they hit afterward.</li>
+                    <li>Try different arena sizes and gravity settings for varied gameplay.</li>
+                    <li>In Shrinking arenas, short blackout moments indicate size transitions and the match is briefly paused to keep everything in sync.</li>
+                </ul>
+            </div>
+            <div class="howto-section">
+                <h2>Health Editor</h2>
+                <ul>
+                    <li>Open it any time from the top bar by clicking the Health button.</li>
+                    <li>Edit any player's HP directly; changes apply instantly to the current match.</li>
+                    <li>Set Default health for new spawns; in Boss mode you can also set a Default boss health.</li>
+                    <li>Defaults reset when you refresh or leave the page (they are not saved).</li>
+                </ul>
+            </div>
+        </div>
+        <button id="howtoBackButton" class="menu-back-button">Back</button>
+    </div>
+
+    <!-- NEW: Custom Ball Maker page -->
+    <div id="custom-maker-menu" style="display:none;">
+      <h1 id="custom-maker-title">CUSTOM BALL MAKER!</h1>
+      <div id="custom-maker-layout">
+        <div id="custom-maker-content">
+            <!-- NEW: Save button on top of the main frame -->
+            <div class="maker-row maker-actions">
+                <button id="makerSaveButton">Save</button>
+                <!-- NEW: blue Load button and Reset button -->
+                <button id="makerLoadButton" style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); color:#fff; border:4px solid #000; border-radius: var(--radius-lg); font-family:'Anton',sans-serif;">Load</button>
+                <button id="makerHardResetButton" style="background: var(--btn-red); color:#fff; border:4px solid #000; border-radius: var(--radius-lg); font-family:'Anton',sans-serif;">Reset</button>
+            </div>
+            <div class="maker-row">
+                <label>Name</label>
+                <input id="makerName" type="text" placeholder="e.g., Sword" />
+            </div>
+            <div class="maker-row">
+                <label>Type</label>
+                <select id="makerType">
+                  <option value="melee">Melee</option>
+                  <option value="ranged">Ranged</option>
+                </select>
+            </div>
+            <div class="maker-row">
+                <label>Colors</label>
+                <input id="makerColor" type="color" value="#ffffff" />
+                <!-- NEW: Outline color picker (no title per request) -->
+                <input id="makerOutlineColor" type="color" value="#000000" />
+                <!-- NEW: Health text color picker (no title) -->
+                <input id="makerHealthTextColor" type="color" value="#000000" />
+            </div>
+            <div class="maker-row">
+                <div class="maker-row-title">
+                  <label style="margin:0;">Behavior</label>
+                  <button id="makerRuleMinus" title="Remove a behavior line" style="width:20px; height:20px; padding:0; font-family: Arial, sans-serif; font-size:12px; line-height:18px;">-</button>
+                  <button id="makerRulePlus" title="Add a behavior line" style="width:20px; height:20px; padding:0; font-family: Arial, sans-serif; font-size:12px; line-height:18px;">+</button>
+                </div>
+                <div id="makerRuleLine" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                  <div data-rule="0"><select id="ruleEffect0"><option value=""></option><option value="damages">damages</option><option value="heals">heals</option><option value="grows">grows</option><option value="shrinks">shrinks</option><option value="faster">gets faster</option><option value="slower">gets slower</option><option value="spin_faster">spins faster</option><option value="spin_slower">spins slower</option></select><select id="ruleScope0" class="rule-scope" style="display:none;"><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="itself">itself</option><option value="everyone">everyone</option></select><span> by </span><input id="ruleAmount0" type="number" step="0.1" min="0" value="" style="width:90px;"><span> when hitting </span><select id="ruleTarget0"><option value=""></option><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="wall">wall</option><option value="anything">anything</option></select></div>
+                  <div data-rule="1"><select id="ruleEffect1"><option value=""></option><option value="damages">damages</option><option value="heals">heals</option><option value="grows">grows</option><option value="shrinks">shrinks</option><option value="faster">gets faster</option><option value="slower">gets slower</option><option value="spin_faster">spins faster</option><option value="spin_slower">spins slower</option></select><select id="ruleScope1" class="rule-scope" style="display:none;"><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="itself">itself</option><option value="everyone">everyone</option></select><span> by </span><input id="ruleAmount1" type="number" step="0.1" min="0" value="" style="width:90px;"><span> when hitting </span><select id="ruleTarget1"><option value=""></option><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="wall">wall</option><option value="anything">anything</option></select></div>
+                  <div data-rule="2"><select id="ruleEffect2"><option value=""></option><option value="damages">damages</option><option value="heals">heals</option><option value="grows">grows</option><option value="shrinks">shrinks</option><option value="faster">gets faster</option><option value="slower">gets slower</option><option value="spin_faster">spins faster</option><option value="spin_slower">spins slower</option></select><select id="ruleScope2" class="rule-scope" style="display:none;"><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="itself">itself</option><option value="everyone">everyone</option></select><span> by </span><input id="ruleAmount2" type="number" step="0.1" min="0" value="" style="width:90px;"><span> when hitting </span><select id="ruleTarget2"><option value=""></option><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="wall">wall</option><option value="anything">anything</option></select></div>
+                  <div data-rule="3"><select id="ruleEffect3"><option value=""></option><option value="damages">damages</option><option value="heals">heals</option><option value="grows">grows</option><option value="shrinks">shrinks</option><option value="faster">gets faster</option><option value="slower">gets slower</option><option value="spin_faster">spins faster</option><option value="spin_slower">spins slower</option></select><select id="ruleScope3" class="rule-scope" style="display:none;"><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="itself">itself</option><option value="everyone">everyone</option></select><span> by </span><input id="ruleAmount3" type="number" step="0.1" min="0" value="" style="width:90px;"><span> when hitting </span><select id="ruleTarget3"><option value=""></option><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="wall">wall</option><option value="anything">anything</option></select></div>
+                  <div data-rule="4"><select id="ruleEffect4"><option value=""></option><option value="damages">damages</option><option value="heals">heals</option><option value="grows">grows</option><option value="shrinks">shrinks</option><option value="faster">gets faster</option><option value="slower">gets slower</option><option value="spin_faster">spins faster</option><option value="spin_slower">spins slower</option></select><select id="ruleScope4" class="rule-scope" style="display:none;"><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="itself">itself</option><option value="everyone">everyone</option></select><span> by </span><input id="ruleAmount4" type="number" step="0.1" min="0" value="" style="width:90px;"><span> when hitting </span><select id="ruleTarget4"><option value=""></option><option value="opponent">opponent</option><option value="teammates">teammates</option><option value="wall">wall</option><option value="anything">anything</option></select></div>
+                </div>
+            </div>
+            <!-- NEW: Stats section -->
+            <div class="maker-row" id="makerStats">
+              <div class="maker-row-title">
+                <label style="margin:0;">Stats</label>
+                <button id="makerStatsMinus" title="Remove a stat line" style="width:22px; height:22px; padding:0; font-family: Arial, sans-serif; font-size:13px; line-height:1;">-</button>
+                <button id="makerStatsPlus" title="Add a stat line" style="width:22px; height:22px; padding:0; font-family: Arial, sans-serif; font-size:13px; line-height:1;">+</button>
+              </div>
+              <div id="makerStatsLines" style="display:flex; flex-direction:column; gap:8px; margin:6px 0;"></div>
+              <div id="makerStatsControls" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+                <label style="min-width:80px;">Size</label>
+                <input id="makerBallSize" type="range" min="12" max="80" step="1" value="35">
+                <label style="min-width:80px;">Speed</label>
+                <input id="makerBallSpeed" type="range" min="0" max="0.3" step="0.002" value="0.15">
+                <label style="min-width:80px;">Spin speed</label>
+                <input id="makerSpinSpeed" type="range" min="0" max="0.5" step="0.001" value="0.03">
+                <span id="makerFireRateSlot" style="display:flex; gap:10px; align-items:center;"></span>
+              </div>
+            </div>
+            <div class="maker-row" id="makerTweaks" style="display:none;">
+                <label>Tweaks</label>
+                <div id="makerTweaksFields"></div>
+            </div>
+            <div class="maker-row">
+                <label>Weapon Texture</label>
+                <input id="makerWeaponTex" type="file" accept="image/*" />
+                <span class="texture-preview-box">
+                  <img class="guideline" src="pixil-frame-0%20(2).png" alt="Guideline">
+                  <img id="makerWeaponPreview" alt="Weapon preview" style="display:none; max-width:120px; image-rendering:pixelated;">
+                </span>
+                <button id="makerWeaponClear" title="Remove weapon texture" style="display:none; padding:0; margin-left:6px; width:22px; height:22px; font-size:14px; line-height:20px; background:#f44336; color:#fff; border:2px solid #000; border-radius:4px; cursor:pointer;">×</button>
+                <!-- NEW: weapon size/length sliders -->
+                <div id="makerWeaponControls" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                  <label style="min-width:80px;">Size</label>
+                  <input id="makerWeaponSize" type="range" min="0.5" max="3" step="0.1" value="1">
+                  <label style="min-width:80px;">Length</label>
+                  <input id="makerWeaponLength" type="range" min="0" max="2" step="0.05" value="1">
+                  <!-- NEW: Offset slider (distance from ball) -->
+                  <label style="min-width:80px;">Offset</label>
+                  <input id="makerWeaponOffset" type="range" min="-0.5" max="2" step="0.05" value="0.6">
+                  <label style="min-width:80px;">Orientation</label>
+                  <input id="makerWeaponRotation" type="range" min="-180" max="180" step="1" value="0">
+                </div>
+            </div>
+            <div class="maker-row" id="makerProjRow">
+                <label>Projectile Texture</label>
+                <input id="makerProjTex" type="file" accept="image/*" />
+                <span class="texture-preview-box">
+                  <img class="guideline" src="pixil-frame-0%20(2).png" alt="Guideline">
+                  <img id="makerProjPreview" alt="Projectile preview" style="display:none; max-width:120px; image-rendering:pixelated;">
+                </span>
+                <button id="makerProjClear" title="Remove projectile texture" style="display:none; padding:0; margin-left:6px; width:22px; height:22px; font-size:14px; line-height:20px; background:#f44336; color:#fff; border:2px solid #000; border-radius:4px; cursor:pointer;">×</button>
+                <!-- NEW: projectile size/length/fire rate sliders -->
+                <div id="makerProjControls" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                  <label style="min-width:80px;">Size</label>
+                  <input id="makerProjSize" type="range" min="0.3" max="3" step="0.1" value="1">
+                  <label style="min-width:80px;">Length</label>
+                  <input id="makerProjLength" type="range" min="0" max="2" step="0.05" value="1">
+                  <label style="min-width:80px;">Fire rate</label>
+                  <input id="makerProjFireRate" type="range" min="50" max="2000" step="10" value="600" style="display:none;">
+                  <label style="min-width:80px;">Orientation</label>
+                  <input id="makerProjRotation" type="range" min="-180" max="180" step="1" value="0">
+                </div>
+            </div>
+            <div class="maker-row">
+                <label>Icon Texture</label>
+                <input id="makerIconTex" type="file" accept="image/*" />
+                <span class="texture-preview-box">
+                  <img class="guideline" src="pixil-frame-0.png" alt="Guideline">
+                  <img id="makerIconPreview" alt="Icon preview" style="display:none; max-width:120px; image-rendering:pixelated;">
+                </span>
+                <button id="makerIconClear" title="Remove icon texture" style="display:none; padding:0; margin-left:6px; width:22px; height:22px; font-size:14px; line-height:20px; background:#f44336; color:#fff; border:2px solid #000; border-radius:4px; cursor:pointer;">×</button>
+            </div>
+            <!-- NEW: Hit/Shoot sound inputs -->
+            <div class="maker-row">
+                <label>Hit Sound (optional)</label>
+                <input id="makerHitSound" type="file" accept="audio/*" />
+            </div>
+            <div class="maker-row" id="makerShootSoundRow" style="display:none;">
+                <label>Shoot Sound (optional)</label>
+                <input id="makerShootSound" type="file" accept="audio/*" />
+            </div>
+        </div>
+        <!-- NEW: Right-side static preview arena -->
+        <div id="custom-maker-arena">
+          <canvas id="makerArenaCanvas"></canvas>
+        </div>
+      </div>
+      <!-- NEW: simple load panel -->
+      <div id="makerLoadPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:100;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#2b2b2b; color:#fff; border:4px solid #000; border-radius:12px; width:min(90vw,600px); max-height:70vh; overflow:auto; padding:16px; box-shadow: var(--shadow-lg);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <h2 style="margin:0; font-family:'Anton',sans-serif; font-weight:400; text-shadow:-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;">Saved Custom Balls</h2>
+            <button id="makerLoadClose" style="background:#fff; color:#000; border:3px solid #000; border-radius:8px; padding:6px 10px; font-family:'Anton',sans-serif;">Close</button>
+          </div>
+          <div id="makerLoadList" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+      </div>
+      <button id="customMakerBackButton" class="menu-back-button">Back</button>
+    </div>
+
+    <!-- NEW: Health panel overlay -->
+    <div id="health-panel" style="display:none;">
+      <div class="health-panel-content">
+        <div class="health-panel-header">
+          <h2>Health Editor</h2>
+          <button id="healthCloseButton" title="Close">Close</button>
+        </div>
+        <div id="healthList" class="health-list"></div>
+      </div>
+    </div>
+
+    <script type="importmap">
+        {
+          "imports": {
+            "@websim/use-query": "https://esm.websim.com/@websim/use-query",
+            "@websim/websim-socket": "https://esm.websim.com/@websim/websim-socket"
+          }
+        }
+    </script>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
