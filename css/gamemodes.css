@@ -1,0 +1,273 @@
+/* Gamemodes screen and expandable selections */
+#gamemodes-menu {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.85);
+    transform-origin: center center;
+    transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+#gamemodes-menu.visible {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#gamemodes-menu h1 {
+    font-size: 72px;
+    margin: 0;
+    text-transform: uppercase;
+    text-shadow:
+        -3px -3px 0 var(--black),
+         3px -3px 0 var(--black),
+        -3px  3px 0 var(--black),
+         3px  3px 0 var(--black),
+         5px 5px 8px rgba(0,0,0,0.5);
+    animation: float 3s ease-in-out infinite;
+}
+
+#gamemodes-menu p {
+    font-size: 32px;
+    color: black;
+}
+
+#gamemode-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+#classic-mode-container { display: flex; flex-direction: column; align-items: center; }
+
+.gamemode-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(90vw, 560px);
+}
+
+/* Expandable arena size panels */
+.arena-size-selection {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+    border-radius: var(--radius-lg);
+    border: 4px solid var(--black);
+    margin-top: 15px;
+    overflow: hidden; /* This hides horizontal and vertical by default */
+    max-height: 0; /* Keep max-height for collapsed state */
+    opacity: 0;
+    padding: 0 15px; /* Keep padding for collapsed state */
+    pointer-events: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+.arena-size-selection.expanded {
+    max-height: 500px; /* Keep max-height for expanded state (will instantly apply) */
+    opacity: 1;
+    padding: 15px; /* Keep padding for expanded state (will instantly apply) */
+    pointer-events: auto;
+    overflow-y: auto; /* Allow vertical scroll */
+    overflow-x: hidden; /* Explicitly hide horizontal scroll */
+    flex-wrap: wrap; /* Allow items to wrap */
+    scrollbar-width: thin;
+    scrollbar-color: white transparent; /* Changed to white */
+}
+
+/* Scrollbar styling (subtle, small) */
+.arena-size-selection.expanded::-webkit-scrollbar,
+.arena-size-options-row::-webkit-scrollbar { /* Added .arena-size-options-row */
+    width: 8px;
+    height: 8px; /* Added height for horizontal scrollbars */
+}
+.arena-size-selection.expanded::-webkit-scrollbar-thumb,
+.arena-size-options-row::-webkit-scrollbar-thumb { /* Added .arena-size-options-row */
+    background: white; /* Changed to white */
+    border-radius: 8px;
+}
+.arena-size-selection.expanded::-webkit-scrollbar-track,
+.arena-size-options-row::-webkit-scrollbar-track { /* Added .arena-size-options-row */
+    background: transparent;
+}
+.arena-size-selection.expanded::-webkit-scrollbar-thumb:hover,
+.arena-size-options-row::-webkit-scrollbar-thumb:hover {
+    background: #f0f0f0; /* Slightly off-white for hover */
+}
+/* Add new styles to remove scrollbar arrows and improve Firefox styling */
+.arena-size-selection.expanded::-webkit-scrollbar-button,
+.arena-size-options-row::-webkit-scrollbar-button {
+    display: none;
+}
+
+/* Color themes */
+#arena-size-selection { background-color: var(--classic-panel); }
+#arena-size-selection-ffa { 
+    background-color: var(--ffa-panel);
+    flex-direction: row; /* Changed back to row like others */
+    align-items: center;
+    gap: 15px; /* Same as others */
+}
+#arena-size-selection-teams { 
+    background-color: var(--teams-panel); 
+    flex-direction: row;            /* match FFA layout */
+    align-items: center;            /* match FFA alignment */
+    gap: 15px;                      /* match FFA spacing */
+}
+
+/* Remove the special row container since FFA is now like the others */
+.arena-size-options-row {
+    display: none;
+}
+
+/* Arena size options */
+.arena-size-option {
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: white;
+    font-size: 20px;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+    transition: filter var(--transition-fast);
+}
+.arena-size-option:hover {
+    /* Removed transform: translateY(-4px); */
+}
+.arena-size-option:active {
+    transform: translateY(0);
+    filter: brightness(1.0);
+}
+
+.arena-size-option:hover .size-square { /* NEW: Turn the inside square green on hover */
+    background-color: var(--btn-green-hover);
+}
+
+.size-square {
+    border: 3px solid var(--black);
+    background-color: var(--white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color var(--transition-fast); /* Add transition for smoothness */
+}
+.small-square { width: 45px; height: 45px; }
+.medium-square { width: 65px; height: 65px; }
+.large-square { width: 85px; height: 85px; }
+.huge-square { width: 105px; height: 105px; }
+.massive-square { width: 125px; height: 125px; }
+
+/* NEW: Composite icon for Shrinking (stacked sizes in one button) */
+.shrinking-stack {
+    position: relative;
+    width: 125px;  /* was 105px; match massive-square footprint */
+    height: 125px; /* was 105px; match massive-square footprint */
+}
+.shrinking-stack .size-square {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.shrinking-stack .massive-square { width: 125px; height: 125px; background-color: var(--white); }
+.shrinking-stack .huge-square   { width: 105px; height: 105px; background-color: var(--offwhite); }
+.shrinking-stack .large-square  { width: 85px;  height: 85px;  background-color: var(--offwhite-2); }
+.shrinking-stack .medium-square { width: 65px;  height: 65px;  background-color: var(--offwhite-3); }
+.shrinking-stack .small-square  { width: 45px;  height: 45px;  background-color: var(--offwhite-3); }
+
+/* Keep the hover highlight behavior consistent: inner-most square goes green */
+.arena-size-option:hover .shrinking-stack .small-square {
+    background-color: var(--btn-green-hover);
+}
+
+/* Make Custom size preview go green on hover (all modes) */
+#custom-arena-btn:hover .size-square,
+#custom-arena-btn-ffa:hover .size-square,
+#custom-arena-btn-teams:hover .size-square,
+#custom-arena-btn-boss:hover .size-square {
+    background-color: var(--btn-green-hover) !important;
+}
+
+/* FFA players count selection (now inside the FFA frame) */
+.players-count-selection {
+    display: none; /* Completely hidden */
+}
+
+.players-count-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+.players-count-btn {
+    padding: 10px 14px;
+    font-size: 18px;
+    border-radius: var(--radius-md);
+    border: 4px solid var(--black);
+    background-color: var(--white);
+    color: black;
+    font-family: 'Anton', sans-serif;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-width: 48px;
+}
+.players-count-btn:hover {
+    background-color: var(--offwhite-2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.players-count-btn.selected {
+    background: linear-gradient(135deg, var(--btn-green) 0%, var(--btn-green-active) 100%); /* Green gradient for selected */
+    color: white; /* Make text white for better contrast */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Boss mode size panel */
+#arena-size-selection-boss {
+    /* Force vibrant flat red with black outline; override anything else */
+    background: none !important;
+    background-color: #E70202 !important;
+    border-color: #000000 !important;
+}
+
+/* Ensure boss panel scroll/expand behavior matches others */
+#arena-size-selection-boss.arena-size-selection {
+  /* inherits base styles */
+}
+
+/* NEW: Make Boss button vibrant and ensure it overrides any earlier styles */
+#gamemodes-menu .gamemode-btn.boss {
+  background: linear-gradient(135deg, #ff3b3b 0%, #ff1f1f 50%, #d40000 100%);
+  color: #fff;
+  border-color: var(--black);
+  font-size: 26px; /* Slightly bigger boss button text */
+}
+#gamemodes-menu .gamemode-btn.boss:hover {
+  background: linear-gradient(135deg, #ff5a5a 0%, #ff2e2e 50%, #ef0000 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+#gamemodes-menu .gamemode-btn.boss:active {
+  background: linear-gradient(135deg, #d90000 0%, #b30000 100%);
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}

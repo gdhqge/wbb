@@ -1,0 +1,31 @@
+/* Animations and text shadows */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.text-outline-strong {
+    text-shadow:
+        -3px -3px 0 var(--black),
+         3px -3px 0 var(--black),
+        -3px  3px 0 var(--black),
+         3px  3px 0 var(--black),
+         5px 5px 8px rgba(0,0,0,0.5);
+}
+
+.text-outline-medium {
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+}
+
+.text-outline-thin {
+    text-shadow:
+        -1.5px -1.5px 0 var(--black),
+         1.5px -1.5px 0 var(--black),
+        -1.5px  1.5px 0 var(--black),
+         1.5px  1.5px 0 var(--black);
+}

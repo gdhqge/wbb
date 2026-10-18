@@ -1,0 +1,76 @@
+/* Design tokens and font faces */
+@font-face {
+    font-family: 'Anton';
+    src: url('/Anton-Regular.ttf') format('truetype');
+}
+
+:root {
+    /* Colors */
+    --bg: #fff4ec;
+    --text: #000;
+    --panel: #7C7879;
+    --white: #ffffff;
+    --offwhite: #f8f8f8;
+    --offwhite-2: #f7f7f7;
+    --offwhite-3: #ededed;
+    --black: #000000;
+
+    /* Brand/button palettes */
+    --btn-green: #4CAF50;
+    --btn-green-hover: #66bb6a;
+    --btn-green-active: #43a047;
+
+    --btn-yellow: #ffc107;
+    --btn-yellow-hover: #ffd54f;
+    --btn-yellow-active: #ffb300;
+
+    --btn-red: #f44336;
+    --btn-red-hover: #f55a4e;
+    --btn-red-active: #e53935;
+
+    --btn-purple-grad-1: #9c27b0;
+    --btn-purple-grad-2: #7b1fa2;
+    --btn-purple-hover-1: #ab47bc;
+    --btn-purple-hover-2: #8e24aa;
+    --btn-purple-active-1: #7b1fa2;
+    --btn-purple-active-2: #6a1b9a;
+
+    --classic-1: #2196f3;
+    --classic-2: #1976d2;
+    --classic-hover-1: #42a5f5;
+    --classic-hover-2: #1a8ad4;
+    --classic-active-1: #1976d2;
+    --classic-active-2: #1063ad;
+    --classic-panel: #1063ad;
+
+    --ffa-1: #ff9800;
+    --ffa-2: #f57c00;
+    --ffa-hover-1: #ffb74d;
+    --ffa-hover-2: #fa9f29;
+    --ffa-active-1: #f57c00;
+    --ffa-active-2: #d46900;
+    --ffa-panel: #d46900;
+
+    --teams-1: #ff00ff;
+    --teams-2: #cc00cc;
+    --teams-hover-1: #ff4dff;
+    --teams-hover-2: #e000e0;
+    --teams-active-1: #cc00cc;
+    --teams-active-2: #a600a6;
+    --teams-panel: #a600a6;
+
+    /* Sizing */
+    --radius-lg: 12px;
+    --radius-md: 10px;
+    --radius-sm: 8px;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.2);
+    --shadow-lg: 0 6px 12px rgba(0,0,0,0.25);
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-med: 0.4s ease;
+    --transition-slow: 0.8s ease;
+}

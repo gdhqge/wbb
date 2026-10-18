@@ -1,0 +1,444 @@
+/* Game container and arena */
+#game-container {
+    transform: scale(0.7);
+    transform-origin: center center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+#game-container.sliding-out-left {
+    transform: translateX(-100vw) scale(0.7);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Extra zoom-out for massive arena */
+#game-container.arena-massive {
+    transform: scale(0.55);
+}
+#game-container.arena-massive.zoom-extra {
+    transform: scale(0.5);
+}
+
+/* NEW: In huge arenas, keep info text closer — reduce excessive spacing */
+#game-container.zoom-extra #damage-info-wrapper {
+    margin-top: 20px; /* was 40px */
+}
+
+/* NEW: Spacing tweaks for small arena to "space out the info" */
+#game-container.arena-small #top-controls {
+    transform: translateY(-40px); /* bring controls closer to reduce overlap */
+    margin-bottom: 14px;          /* add breathing room below controls */
+}
+
+#game-container.arena-small #versus-display {
+    margin-bottom: 28px; /* more space between VS and arena */
+}
+
+#game-container.arena-small #damage-info-wrapper {
+    margin-top: 32px; /* push damage/info further from arena for clarity */
+}
+
+#game-container.arena-small #arena-wrapper {
+    gap: 24px; /* slightly widen gap between sidebars and canvas */
+}
+
+/* NEW: Specific overrides for shrinking arena to reduce excessive spacing */
+#game-container.arena-huge.zoom-extra #damage-info-wrapper {
+    margin-top: 12px; /* drastically reduce from default 20px */
+}
+
+#game-container.arena-huge.zoom-extra #controls {
+    margin-top: 25px; /* override the dynamic spacing to keep controls closer */
+}
+
+/* NEW: Custom grid overlay visual defaults */
+#custom-grid-overlay {
+    /* sits above canvas, below shrink overlay */
+    z-index: 1;
+    image-rendering: pixelated;
+    cursor: crosshair;
+}
+
+/* NEW: highlight active erase mode */
+#eraseButton.active {
+    filter: brightness(0.95);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.2) inset;
+}
+
+/* NEW: highlight active tools with a subtle "pop up" effect */
+#paintButton.active,
+#eraseButton.active {
+    transform: translateY(-3px) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+#arena-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    position: relative; /* Add position relative to contain absolute children */
+}
+
+#gameCanvas {
+    border: 5px solid var(--black);
+    background-color: transparent; /* was var(--white); make canvas transparent so the custom grid (background canvas) is visible */
+}
+
+/* Stack container to position blackout/text over the canvas only */
+#canvas-stack {
+    position: relative;
+    display: inline-block; /* fit to canvas size */
+    background: #ffffff;   /* keep arena background white always */
+}
+
+/* Full-cover blackout + message during shrink transitions */
+#arena-shrinking-overlay {
+    position: absolute;
+    inset: 0;
+    background: #000;               /* turn arena black while shrinking */
+    display: none;                  /* toggled by JS when shrinking is active */
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;           /* allow clicks to pass through if needed */
+    z-index: 2;                     /* above canvas, below sidebars since it only covers canvas area */
+}
+
+#arena-shrinking-overlay .shrinking-text {
+    color: #fff;
+    font-family: 'Anton', sans-serif;
+    font-size: 44px;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+    animation: float 3s ease-in-out infinite; /* subtle floating */
+}
+
+/* Selection panels */
+.selection-box {
+    width: 180px; /* was 150px - make sidebars slightly wider */
+    border: 5px solid var(--black);
+    background-color: var(--panel);
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto; /* Allow vertical scroll */
+    overflow-x: hidden; /* Hide horizontal scroll */
+}
+
+/* Polished slim scrollbars for side panels */
+.selection-box {
+    scrollbar-width: thin;              /* Firefox */
+    scrollbar-color: white transparent; /* Changed to white */
+}
+.selection-box::-webkit-scrollbar {
+    width: 10px;
+}
+.selection-box::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+    box-shadow: none;
+}
+.selection-box::-webkit-scrollbar-thumb {
+    background: white; /* Changed to white */
+    border-radius: 10px;
+    border: 2px solid white; /* Changed to white */
+}
+.selection-box::-webkit-scrollbar-thumb:hover {
+    background: #f0f0f0; /* Slightly off-white for hover */
+}
+/* Add these new styles to remove scrollbar arrows */
+.selection-box::-webkit-scrollbar-button {
+    display: none;
+}
+
+.selection-box > *:first-child { margin-top: 0; }
+.selection-box > *:last-child { margin-bottom: 0; }
+
+.weapon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.weapon-display {
+    margin: 10px 0;
+    padding: 10px;
+    border: 4px solid var(--black);
+    background-color: #f8f8f8;
+    border-radius: var(--radius-sm);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box; /* ADDED: Ensure padding and border are included in the width */
+}
+.weapon-display:hover {
+    background-color: var(--white);
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.weapon-display.selected {
+    transform: scale(1.1) translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.weapon-display:active {
+    background-color: var(--offwhite-3);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+.weapon-display.selected:active {
+    transform: scale(1.08) translateY(0);
+}
+.weapon-display img { 
+    image-rendering: pixelated;
+    width: 60px;
+    height: 60px;
+}
+
+/* Damage/versus */
+#damage-info-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: auto;
+    margin-top: 20px; /* was 5px; lower the info text area a bit */
+    box-sizing: border-box;
+    position: relative;
+    pointer-events: none; /* Prevent interference with other elements */
+}
+
+#damage-info-wrapper > * {
+    pointer-events: auto; /* Re-enable pointer events for child elements */
+}
+
+.damage-display {
+    font-size: 34px;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+    width: 280px;
+    box-sizing: border-box;
+    height: 45px;
+    margin: 5px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    white-space: nowrap;
+}
+#damage-display-left { text-align: left; padding-left: 5px; }
+#damage-display-right { text-align: right; padding-right: 5px; }
+
+/* Styles specific to FFA damage info wrapper and its children */
+#damage-info-wrapper[style*="flex-direction: column"] { /* Targeting FFA layout */
+}
+
+.weapon-name-ffa {
+    font-size: 30px; /* Slightly larger than the value */
+    color: white;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+    margin-top: 10px; /* Spacing from previous element */
+    margin-bottom: 2px; /* Spacing to the value below it */
+    text-align: center;
+    width: 100%; /* Ensure it takes full width of parent column */
+    box-sizing: border-box;
+}
+
+.damage-display.ffa-value-display {
+    font-size: 24px; /* As previously set for FFA */
+    text-align: center; /* Centered as requested */
+    width: 100%; /* Ensure it takes full width of parent column (200px) */
+    height: 35px; /* As previously set for FFA */
+    margin: 0; /* Remove top/bottom margin, controlled by weapon-name-ffa */
+    padding: 0; /* Remove padding */
+}
+
+/* Override specific left/right alignment for damage displays when they are used in FFA context */
+#damage-display-left.ffa-value-display,
+#damage-display-right.ffa-value-display {
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* NEW: Top controls row above the VS text */
+#top-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    /* Visually move the button row higher without affecting layout flow */
+    margin-top: 0;
+    margin-bottom: 10px;
+    transform: translateY(-70px); /* lowered from -100px */
+}
+
+#versus-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    /* Place VS text closer to the arena */
+    margin-bottom: 20px;
+    font-size: 44px;
+    font-family: 'Anton', sans-serif;
+    height: 55px;
+}
+.versus-text {
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+}
+.versus-icon {
+    width: 46px;
+    height: 46px;
+    image-rendering: pixelated;
+}
+.versus-icon.flipped { transform: scaleX(-1); }
+
+/* Smaller info text specifically for Unarmed */
+.damage-display .unarmed-info {
+    font-size: 26px;
+    line-height: 1.3; /* Increased from 1.05 for more spacing between lines */
+}
+
+/* Background canvas is hidden by default; only shown in Custom mode */
+#custom-grid-background {
+    display: none;
+}
+
+.damage-display .stat-small {
+    font-size: 0.92em;
+}
+
+.damage-display .stat-smaller {
+    font-size: 0.8em;
+}
+
+/* NEW: Health panel overlay */
+#health-panel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 120;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#health-panel .health-panel-content {
+  background: #2b2b2b; /* match maker load frame */
+  color: #fff;         /* white text like load frame */
+  border: 4px solid #000;
+  border-radius: 12px;
+  width: min(92vw, 720px);
+  max-height: 75vh;
+  overflow: auto;
+  box-shadow: var(--shadow-lg);
+  padding: 12px; /* was 16px */
+}
+#health-panel .health-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* was space-between; align the X button to the right */
+  margin-bottom: 10px;
+  position: relative; /* center the title independently of the Close button */
+}
+#health-panel .health-panel-header h2 {
+  font-family: 'Anton', sans-serif;
+  margin: 0;
+  text-shadow:
+    -2px -2px 0 var(--black),
+     2px -2px 0 var(--black),
+    -2px  2px 0 var(--black),
+     2px  2px 0 var(--black);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #fff; /* white title */
+  font-weight: 400; /* make title not bold */
+}
+#healthCloseButton {
+  background-color: var(--btn-red) !important;
+  color: #fff !important;
+  border: 4px solid #000 !important;
+  border-radius: 10px !important;
+  font-family: Arial, sans-serif !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+}
+#healthCloseButton:hover {
+  background-color: #9e9a9b;
+}
+.health-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* was 10px */
+}
+.health-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto 80px; /* was 100px */
+  gap: 10px;
+  align-items: center;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px; /* was 10px */
+  background: #f8f8f8;
+}
+/* Ensure the HP label sits left of the input on the same row */
+.health-item .hp-label {
+  font-family: 'Anton', sans-serif;
+  font-size: 18px;
+  opacity: 1;
+  justify-self: end;
+  color: #000;
+}
+.health-item .team {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  opacity: 0.7;
+}
+.health-item .icon {
+  width: 28px;  /* was 34px */
+  height: 28px; /* was 34px */
+  image-rendering: pixelated;
+  border: none;          /* remove thick black outline */
+  background: transparent;
+  border-radius: 0;      /* remove rounded corners */
+}
+.health-item input[type="number"] {
+  width: 60px; /* was 70px */
+  padding: 4px 6px;       /* tighter padding */
+  border: 2px solid #000;
+  border-radius: 6px;
+  font-family: 'Noto Sans', Arial, sans-serif;
+  background: #fff;
+  color: #000;
+}
+
+/* Two-column layout for P1 (left) and P2 (right) in the health panel */
+.health-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}

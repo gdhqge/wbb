@@ -1,0 +1,423 @@
+/* Specific button variants and groups */
+#startButton {
+    /* Shorter Start button on main menu */
+    padding: 12px 28px;
+    font-size: 20px;
+    border-radius: var(--radius-lg);
+    border: 4px solid var(--black);
+    background-color: var(--btn-green);
+    color: black;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+}
+#startButton:hover {
+    background-color: var(--btn-green-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+#startButton:active {
+    background-color: var(--btn-green-active);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+#gamemodesButton {
+    background: linear-gradient(135deg, var(--btn-purple-grad-1) 0%, var(--btn-purple-grad-2) 100%);
+    color: white;
+    margin-left: auto;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+}
+#gamemodesButton:hover {
+    background: linear-gradient(135deg, var(--btn-purple-hover-1) 0%, var(--btn-purple-hover-2) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#gamemodesButton:active {
+    background: linear-gradient(135deg, var(--btn-purple-active-1) 0%, var(--btn-purple-active-2) 100%);
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#controls {
+    margin-top: 60px;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column; /* stack zoom controls under play/reset */
+    align-items: center;    /* center the stacked rows */
+}
+
+#game-buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center; /* ensure inline alignment with zoom controls */
+}
+/* NEW: speed button sizing */
+#speedButton {
+    min-width: 56px;
+    background-color: var(--panel);            /* changed from var(--btn-yellow) */
+    color: white;                              /* keep white text */
+    border-color: var(--black);                /* keep strong outline */
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black);             /* black text outline */
+}
+
+#playButton {
+    background-color: var(--btn-green);
+    color: black;
+}
+#playButton:hover {
+    background-color: var(--btn-green-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#playButton:active {
+    background-color: var(--btn-green-active);
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#playButton.paused {
+    background-color: var(--btn-yellow);
+}
+#playButton.paused:hover {
+    background-color: var(--btn-yellow-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#playButton.paused:active {
+    background-color: var(--btn-yellow-active);
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#resetButton {
+    background-color: var(--btn-red);
+    color: black;
+}
+#resetButton:hover {
+    background-color: var(--btn-red-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#resetButton:active {
+    background-color: var(--btn-red-active);
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#hideUIButton {
+    background: linear-gradient(135deg, var(--classic-1) 0%, var(--classic-2) 100%);
+    color: white;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+    transition: all var(--transition-fast);
+}
+#hideUIButton:hover {
+    background: linear-gradient(135deg, var(--classic-hover-1) 0%, var(--classic-hover-2) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#hideUIButton:active {
+    background: linear-gradient(135deg, var(--classic-active-1) 0%, var(--classic-active-2) 100%);
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* NEW: small +/- zoom buttons underneath play/reset */
+#zoom-controls {
+    margin-top: 0;                 /* integrated into bottom row */
+    display: flex;
+    justify-content: center;
+    gap: 4px; /* was 10px - make +/- buttons closer together */
+}
+#zoom-controls button {
+    width: 32px;
+    height: 32px;
+    min-width: 0;
+    padding: 0;
+    font-family: Arial, sans-serif; /* Arial as requested */
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* NEW: Styles for the Clear All button in FFA selection */
+.ffa-clear-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: var(--btn-red);
+    color: var(--black);
+    border: 4px solid var(--black);
+    border-radius: 6px;
+    font-family: 'Anton', sans-serif;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    width: 110px !important; /* was 140px; force narrower width */
+}
+.ffa-clear-btn:hover {
+    background-color: var(--btn-red-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+.ffa-clear-btn:active {
+    background-color: var(--btn-red-active);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* NEW: Gravity button on/off scheme (white with black text when on; black with white text when off)
+   We keep programmatic control in game.js, these are just defaults. */
+#gravityButton {
+    background-color: var(--white);
+    color: var(--black);
+}
+
+/* Keep consistent outline styling for white-text buttons already defined elsewhere */
+
+/* Optional: make the three top controls feel cohesive (inherits base button styles) */
+#top-controls button {
+    min-width: 120px;
+}
+/* Add consistent hover/active animations for all top-row buttons */
+#top-controls button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#top-controls button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Gamemode menu buttons */
+.gamemode-btn {
+    padding: 20px 40px;
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: var(--radius-lg);
+    border: 4px solid var(--black);
+    font-family: 'Anton', sans-serif;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+    color: black;
+    min-width: 273px;
+    width: 273px;
+    box-sizing: border-box;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4);
+}
+.gamemode-btn.classic {
+    background: linear-gradient(135deg, var(--classic-1) 0%, var(--classic-2) 100%);
+}
+.gamemode-btn.classic:hover {
+    background: linear-gradient(135deg, var(--classic-hover-1) 0%, var(--classic-hover-2) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.gamemode-btn.classic:active {
+    background: linear-gradient(135deg, var(--classic-active-1) 0%, var(--classic-active-2) 100%);
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+}
+
+.gamemode-btn.free-for-all {
+    background: linear-gradient(135deg, var(--ffa-1) 0%, var(--ffa-2) 100%);
+}
+.gamemode-btn.free-for-all:hover {
+    background: linear-gradient(135deg, var(--ffa-hover-1) 0%, var(--ffa-hover-2) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.gamemode-btn.free-for-all:active {
+    background: linear-gradient(135deg, var(--ffa-active-1) 0%, var(--ffa-active-2) 100%);
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+}
+
+.gamemode-btn.teams {
+    background: linear-gradient(135deg, var(--teams-1) 0%, var(--teams-2) 100%);
+}
+.gamemode-btn.teams:hover {
+    background: linear-gradient(135deg, var(--teams-hover-1) 0%, var(--teams-hover-2) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.gamemode-btn.teams:active {
+    background: linear-gradient(135deg, var(--teams-active-1) 0%, var(--teams-active-2) 100%);
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+}
+
+.gamemode-btn.boss {
+    background: linear-gradient(135deg, #d24a4a 0%, #b63e3e 100%); /* subtle red gradient */
+    color: white;
+}
+.gamemode-btn.boss:hover {
+    background: linear-gradient(135deg, #e05a5a 0%, #c94b4b 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.gamemode-btn.boss:active {
+    background: linear-gradient(135deg, #b63e3e 0%, #9f3535 100%);
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+}
+
+/* Back button in gamemodes */
+#backButton.gamemode-btn {
+    padding: 10px 20px;
+    font-size: 18px;
+    min-width: 150px;
+    width: 150px;
+}
+
+#gamemodes-menu button {
+    background-color: var(--panel);
+    color: white;
+}
+#gamemodes-menu button:hover {
+    background-color: #9e9a9b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#gamemodes-menu button:active {
+    background-color: #6a6667;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* NEW: Custom mode tool buttons (force colors so nothing overrides them) */
+#brushSizeButton {
+    background-color: var(--btn-yellow) !important;
+    color: black !important;
+    border-color: var(--black) !important;
+}
+#brushSizeButton:hover {
+    background-color: var(--btn-yellow-hover) !important;
+}
+#brushSizeButton:active {
+    background-color: var(--btn-yellow-active) !important;
+}
+
+/* NEW: Paint tool button (green) */
+#paintButton {
+    background-color: var(--btn-green) !important;
+    color: black !important;
+    border-color: var(--black) !important;
+}
+#paintButton:hover {
+    background-color: var(--btn-green-hover) !important;
+}
+#paintButton:active {
+    background-color: var(--btn-green-active) !important;
+}
+
+/* NEW: Erase tool button (red) */
+#eraseButton {
+    background-color: var(--btn-red) !important;
+    color: black !important;
+    border-color: var(--black) !important;
+}
+#eraseButton:hover {
+    background-color: var(--btn-red-hover) !important;
+}
+#eraseButton:active {
+    background-color: var(--btn-red-active) !important;
+}
+
+#musicMuteButton {
+    background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%) !important;
+    color: white !important;
+    border-color: var(--black) !important;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4) !important;
+}
+
+/* NEW: Health button styling (teal) */
+#healthButton {
+    background: linear-gradient(135deg, #ff5252 0%, #d50000 100%) !important;
+    color: white !important;
+    border-color: var(--black) !important;
+    text-shadow:
+        -2px -2px 0 var(--black),
+         2px -2px 0 var(--black),
+        -2px  2px 0 var(--black),
+         2px  2px 0 var(--black),
+         4px 4px 6px rgba(0,0,0,0.4) !important;
+}
+#healthButton:hover {
+    background: linear-gradient(135deg, #ff6e6e 0%, #e00000 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#healthButton:active {
+    background: linear-gradient(135deg, #d50000 0%, #b71c1c 100%) !important;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#customMakerButton {
+    background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080);
+    background-size: 400% 400%;
+    animation: rainbowBackground 8s ease infinite;
+    color: white;
+    text-shadow:
+      -2px -2px 0 var(--black),
+       2px -2px 0 var(--black),
+      -2px  2px 0 var(--black),
+       2px  2px 0 var(--black),
+       4px 4px 6px rgba(0,0,0,0.4);
+}
+/* Add small (BETA) label under the button */
+#customMakerButton::after {
+    content: '(BETA)';
+    display: block;
+    font-family: 'Anton', sans-serif;
+    font-size: 16px;
+    line-height: 1;
+    color: #000;
+    text-shadow:
+      -1.5px -1.5px 0 var(--white),
+       1.5px -1.5px 0 var(--white),
+      -1.5px  1.5px 0 var(--white),
+       1.5px  1.5px 0 var(--white);
+    margin-top: 2px;
+}
+
+.ffa-add-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: var(--btn-green);
+    color: var(--black);
+    border: 4px solid var(--black);
+    border-radius: 6px;
+    font-family: 'Anton', sans-serif;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    width: 110px !important; /* was 140px; force narrower width */
+    margin-top: 8px;        /* add a little spacing below Clear All */
+}
+.ffa-add-btn:hover { background-color: var(--btn-green-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.ffa-add-btn:active { background-color: var(--btn-green-active); transform: translateY(0); box-shadow: var(--shadow-sm); }
